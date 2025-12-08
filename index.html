@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdikani_Portfolio</title>
+    <style>
+
+        html{
+            scroll-behavior: smooth;
+        }
+
+        /* Aasaaska Guud */
+        body{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+
+         /* 1. Navbar Styles */
+         .navbar{
+            background-color: #003366;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top:0;
+            z-index: 1000;
+         }
+
+         .logo{font-size: 20px; font-weight: bold; font-family: Georgia, 'Times New Roman', Times, serif;}
+
+         .nav-links{
+            list-style: none;
+            display: flex;
+            gap: 20px;
+         }
+
+         .nav-links a{
+            color: white; 
+            text-decoration: none; 
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #d9534f;
+        }
+
+
+        /* 2. Hero Section (Hordhaca) */
+        .hero{
+            text-align: center;
+            padding: 80px 20px;
+            background-color: white;
+            margin-bottom: 20px;
+        }
+
+        .highlight{
+            color: #d9534f;
+        }
+
+        .btn{
+            display: inline-block;
+            background-color: #003366;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* 3. About Section */
+        .About{
+            background-color:white;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            line-height: 1.6;
+        }
+
+        /* 4. Contact Section */
+        .Contact { 
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 24px;
+        }
+        
+        form{
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            margin: 0 auto;
+            gap: 15px;
+        }
+
+        input,textarea{
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #003366;
+        }
+
+        button{
+            background-color: #d9534f;
+            padding: 10px;
+            color:white ;
+            border:none ;
+            cursor:pointer;
+            font-size: 14px;
+        }
+
+        button:hover{
+            background-color: #c9302c;
+        }
+
+        /* 5. Footer */
+        .footer{
+            background-color: #333;
+            color:white ;
+            text-align: center;
+            padding: 8px;
+            margin-top: 40px
+        }
+
+        /* Mobile Responsive */
+        @media (max-width:600px) {
+            .navbar, .nav-links{flex-direction: column; text-align: center;}
+            .nav-links {
+                flex-direction: column;
+                gap: 15px; 
+                margin-top: 15px; 
+                padding: 0;
+                width: 100%;
+            }
+
+            .nav-links li{width: 100%;}
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- 1. QEYBTA SARE (HEADER/NAV) -->
+    <nav class="navbar">
+        <div class="logo">AK</div>
+        <ul class="nav-links">
+            <li><a href="#Home">Home</a></li>
+            <li><a href="#About">About</a></li>
+            <li><a href="#Contact">Contact</a></li>
+            <li><a href="#LIVE">Live</a></li>
+        </ul>
+    </nav>
+
+
+    <!-- 2. QEYBTA HORDHACA (HERO SECTION) -->
+     <section id="home" class="hero">
+        <h1>Soo dhawoow, waxaan ahay <span class="highlight">Abdikani Omer</span></h1>
+        <p>Telecom Engineer & full website developer.</p>
+        <a href="#contact" class="btn">igala soo xidhiidh </a>
+     </section>
+
+
+     <!-- 3. QEYBTA IGU SAABSAN (ABOUT SECTION) -->
+      <section id="About" class="About">
+        <h2>About Me</h2>
+        <p>Waxaan ahay Engineer leh xirfad isku dhafan. Waxaan haystaa shahaadada Telecom Engineering, waxaanan hadda ku takhasusayaa Web Development si aan u xalliyo dhibaatooyinka casriga ah.</p>
+        <h3>Xirfadahayga:</h3>
+        <ul>
+            <li>🌐 HTML, CSS, Responsive Design</li>
+            <li>📡 Telecommunication Systems</li>
+            <li>🔧 Troubleshooting & Logic</li>
+        </ul>
+    </section>
+
+
+     <!-- 4. QEYBTA XIRIIRKA (CONTACT SECTION) -->
+      <section id="Contact" class="Contact">
+        <h2><span class="highlight">Contact Me</span></h2>
+        <form>
+            <input type="text" placeholder="Magacaga...." required>
+            <input type="email" placeholder="Emailkaga..." required>
+            <textarea placeholder="Fariintada halkan ku qor...." rows="5"></textarea>
+            <button type="submit">Send your message</button>
+        </form>
+      </section>
+
+
+       <!-- 5. QEYBTA HOOSE (FOOTER) -->
+        <div class="footer">
+            <p>Copyright © 2025 Eng. Abdikani Omer.</p>
+        </div>
+
+</body>
+</html>
