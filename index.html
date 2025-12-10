@@ -154,7 +154,17 @@
         }
 
         /* Mobile Responsive */
-        
+        @media (max-width:600px) {
+            .navbar, .nav-links{flex-direction: column; text-align: center;}
+            .nav-links {
+                flex-direction: column;
+                gap: 15px; 
+                margin-top: 15px; 
+                padding: 0;
+                width: 100%;
+            }
+
+            .nav-links li{width: 100%;}
         }
     </style>
 </head>
