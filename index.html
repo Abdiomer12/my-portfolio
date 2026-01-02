@@ -3,33 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to Excel - Exam Converter</title>
-    <!-- Waxaan isticmaalaynaa Libraries caawinaya akhrinta PDF iyo samaynta Excel -->
+    <title>PDF to Excel - Exam Formatter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 450px; }
-        h2 { color: #2c3e50; margin-bottom: 20px; }
-        input[type="file"] { margin-bottom: 20px; display: block; width: 100%; }
-        button { background-color: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { background-color: #219150; }
-        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        #status { margin-top: 15px; color: #7f8c8d; font-size: 14px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 500px; text-align: center; }
+        h2 { color: #1a73e8; margin-bottom: 10px; }
+        p { color: #5f6368; font-size: 14px; margin-bottom: 25px; }
+        input[type="file"] { border: 1px dashed #dadce0; padding: 20px; width: 90%; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
+        button { background-color: #1a73e8; color: white; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        button:hover { background-color: #1557b0; }
+        #status { margin-top: 20px; font-weight: 500; color: #d93025; }
+        .format-note { font-size: 12px; color: #70757a; text-align: left; background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>PDF to Excel Converter</h2>
-    <p>Gali faylka PDF-ka ee su'aalaha ah:</p>
+<div class="card">
+    <h2>Excel Exam Converter</h2>
+    <p>U bedel PDF-kaaga qaabka Excel ee aad rabto</p>
+    
     <input type="file" id="pdfInput" accept="application/pdf">
-    <button id="convertBtn">Bedel oo soo saar Excel</button>
+    <button id="convertBtn">Soo saar Excel (XLSX)</button>
+    
     <div id="status"></div>
+
+    <div class="format-note">
+        <strong>Fiiro gaar ah:</strong><br>
+        1. Column A: Number-ka su'aasha<br>
+        2. Column B: Su'aasha (Question)<br>
+        3. Column G: Correct Answer (Wuxuu raadinayaa dookha leh calaamadda *)
+    </div>
 </div>
 
 <script>
-    // In loo sheego browser-ka halka uu ka helayo PDF workers
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     document.getElementById('convertBtn').addEventListener('click', async () => {
@@ -37,75 +45,105 @@
         const status = document.getElementById('status');
         
         if (fileInput.files.length === 0) {
-            alert("Fadlan marka hore dooro fayl PDF ah!");
+            status.innerText = "Fadlan dooro fayl PDF ah!";
             return;
         }
 
-        status.innerText = "Waa lala soo baxayaa xogta... fadlan sug.";
+        status.style.color = "#1a73e8";
+        status.innerText = "Waa lala soo baxayaa xogta...";
+
         const file = fileInput.files[0];
         const reader = new FileReader();
 
         reader.onload = async function() {
-            const typedarray = new Uint8Array(this.result);
-            const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            let fullText = "";
+            try {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let fullText = "";
 
-            // 1. Akhrinta dhammaan boggaga PDF-ka
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(" ");
-                fullText += pageText + "\n";
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(" ");
+                    fullText += pageText + "\n";
+                }
+
+                processData(fullText);
+            } catch (err) {
+                status.innerText = "Khalad baa dhacay xilliga akhrinta PDF-ka.";
             }
-
-            processData(fullText);
         };
         reader.readAsArrayBuffer(file);
     });
 
     function processData(text) {
-        // Tani waa qaybta xogta u kala jebinaysa Question iyo Options
-        // Waxay raadinaysaa qaabka "1. Su'aasha..."
-        const lines = text.split(/\d+\./); 
-        const data = [];
+        // Waxaan u kala jabinaynaa su'aalaha (Haddii ay ku bilaawdaan 1. ama 2.)
+        const questionBlocks = text.split(/(?=\d+[\.\)])/);
+        const finalRows = [];
 
-        // Madaxa Excel-ka (Headers) sida sawirkaaga ka muuqata
-        data.push(["Question", "Option1", "Option2", "Option3", "Option4", "CorrectAnswer"]);
+        // Row 3: Header-ka Weyn (sida sawirkaaga)
+        finalRows.push(["", "EXAM CHAPTER NINE EP2 HISTORY", "", "", "", "", ""]);
+        
+        // Row 4: Column names
+        finalRows.push(["No", "Question", "Option1", "Option2", "Option3", "Option4", "CorrectAnswer"]);
 
-        lines.forEach((line, index) => {
-            if (index === 0 || line.trim() === "") return;
+        questionBlocks.forEach((block, index) => {
+            if (block.trim().length < 10) return;
 
-            // Isku day inaad xogta u kala qaybiso su'aal iyo dookhyo
-            // Fiiro gaar ah: Tani waxay ku xirantahay sida PDF-kaagu u qoran yahay
-            let parts = line.split(/(?=[A-D]\)|[A-D]\.)/); // Waxay raadinaysaa A) ama A.
+            // Nidaamka lagu kala saarayo su'aasha iyo dookhyada
+            let questionNum = index + 1;
+            let parts = block.split(/(?=[A-D][\.\)])/); 
             
-            let question = parts[0]?.trim() || "N/A";
-            let opt1 = parts[1]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let opt2 = parts[2]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let opt3 = parts[3]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let opt4 = parts[4]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let correct = ""; // PDF-ku inta badan ma sheego jawaabta saxda ah haddaan si gaar ah loo calaamadin
+            let questionText = parts[0].replace(/^\d+[\.\)]\s*/, "").trim();
+            let opt1 = parts[1] ? parts[1].trim() : "";
+            let opt2 = parts[2] ? parts[2].trim() : "";
+            let opt3 = parts[3] ? parts[3].trim() : "";
+            let opt4 = parts[4] ? parts[4].trim() : "";
 
-            data.push([question, opt1, opt2, opt3, opt4, correct]);
+            // LOGIC-KA CORRECT ANSWER:
+            // Wuxuu raadinayaa dookha leh calaamadda '*' ama haddii PDF-kaagu si kale u calaamadeeyo
+            let correctAnswer = "";
+            [opt1, opt2, opt3, opt4].forEach(opt => {
+                if (opt.includes("*") || opt.includes("✓")) {
+                    correctAnswer = opt.replace(/[\*✓]/g, "").trim();
+                }
+            });
+
+            // Ku dar row-ga xogta (A-G)
+            finalRows.push([
+                questionNum, 
+                questionText, 
+                opt1.replace(/^[A-D][\.\)]\s*/, ""), 
+                opt2.replace(/^[A-D][\.\)]\s*/, ""), 
+                opt3.replace(/^[A-D][\.\)]\s*/, ""), 
+                opt4.replace(/^[A-D][\.\)]\s*/, ""), 
+                correctAnswer
+            ]);
         });
 
-        createExcel(data);
+        generateExcel(finalRows);
     }
 
-    function createExcel(data) {
-        const status = document.getElementById('status');
-        
-        // Sameynta Workbook-ga Excel
+    function generateExcel(rows) {
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(data);
+        const ws = XLSX.utils.aoa_to_sheet(rows);
 
-        // Ku darista sheet-ka
-        XLSX.utils.book_append_sheet(wb, ws, "Exam Data");
+        // Dejinta ballaca columns-ka si ay u ekaato sawirkaaga
+        ws['!cols'] = [
+            { wch: 5 },  // A: No
+            { wch: 50 }, // B: Question
+            { wch: 20 }, // C: Opt 1
+            { wch: 20 }, // D: Opt 2
+            { wch: 20 }, // E: Opt 3
+            { wch: 20 }, // F: Opt 4
+            { wch: 25 }  // G: Correct Answer
+        ];
 
-        // Soo dejinta faylka
-        XLSX.writeFile(wb, "History_Exam_Converted.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "ExamData");
+        XLSX.writeFile(wb, "Exam_History_Ready.xlsx");
         
-        status.innerText = "Waa la dhameeyay! Faylkii Excel-ka waa kuu soo degay.";
+        document.getElementById('status').innerText = "Dhamaystiran! Excel-kii waa kuu diyaar.";
+        document.getElementById('status').style.color = "#28a745";
     }
 </script>
 
