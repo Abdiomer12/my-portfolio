@@ -3,109 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to Excel - Exam Converter</title>
-    <!-- Waxaan isticmaalaynaa Libraries caawinaya akhrinta PDF iyo samaynta Excel -->
+    <title>Professional PDF to Excel Converter</title>
+    
+    <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 450px; }
-        h2 { color: #2c3e50; margin-bottom: 20px; }
-        input[type="file"] { margin-bottom: 20px; display: block; width: 100%; }
-        button { background-color: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { background-color: #219150; }
-        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        #status { margin-top: 15px; color: #7f8c8d; font-size: 14px; }
+        :root {
+            --primary: #2563eb;
+            --secondary: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%), 
+                              radial-gradient(at 100% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .container {
+            background: var(--card);
+            width: 850px;
+            max-width: 95%;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #e2e8f0;
+            background: #fbfcfe;
+            padding: 60px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: #f1f5ff;
+        }
+
+        .upload-zone i { font-size: 60px; color: var(--primary); margin-bottom: 15px; }
+
+        input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+
+        .file-list {
+            text-align: left;
+            margin-bottom: 25px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+        }
+
+        .file-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .file-item i { color: #ef4444; margin-right: 12px; }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4); }
+        .btn-start:disabled { background: #cbd5e0; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        #statusMsg { margin-top: 20px; font-weight: 600; color: #475569; }
+
+        .info-tags {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .tag { background: #f1f5f9; padding: 5px 12px; border-radius: 20px; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>PDF to Excel Converter</h2>
-    <p>Gali faylka PDF-ka ee su'aalaha ah:</p>
-    <input type="file" id="pdfInput" accept="application/pdf">
-    <button id="convertBtn">Bedel oo soo saar Excel</button>
-    <div id="status"></div>
+    <div class="header">
+        <h1><i class="fas fa-file-invoice"></i> PDF to Excel Master</h1>
+        <p>U bedel imtixaannadaada Excel nadiif ah (Font 11 & Full Text Answer)</p>
+    </div>
+
+    <div class="upload-zone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <h3>Dooro PDF-yadaada</h3>
+        <p>Waad soo gelin kartaa hal mar dhowr fayl</p>
+        <input type="file" id="pdfInput" accept="application/pdf" multiple>
+    </div>
+
+    <div id="fileList" class="file-list"></div>
+
+    <button id="convertBtn" class="btn-start" disabled>
+        <i class="fas fa-play-circle"></i> BILOW BEDELKA
+    </button>
+
+    <div id="statusMsg"></div>
+
+    <div class="info-tags">
+        <span class="tag">✔ Full Text Answer</span>
+        <span class="tag">✔ Font 11</span>
+        <span class="tag">✔ Math & Arabic</span>
+        <span class="tag">✔ Row 3 Start</span>
+    </div>
 </div>
 
 <script>
-    // In loo sheego browser-ka halka uu ka helayo PDF workers
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    document.getElementById('convertBtn').addEventListener('click', async () => {
-        const fileInput = document.getElementById('pdfInput');
-        const status = document.getElementById('status');
-        
-        if (fileInput.files.length === 0) {
-            alert("Fadlan marka hore dooro fayl PDF ah!");
-            return;
+    const pdfInput = document.getElementById('pdfInput');
+    const fileListDiv = document.getElementById('fileList');
+    const convertBtn = document.getElementById('convertBtn');
+    const statusMsg = document.getElementById('statusMsg');
+
+    pdfInput.onchange = () => {
+        fileListDiv.innerHTML = "";
+        if (pdfInput.files.length > 0) {
+            convertBtn.disabled = false;
+            Array.from(pdfInput.files).forEach(file => {
+                fileListDiv.innerHTML += `<div class="file-item"><i class="fas fa-file-pdf"></i> <span>${file.name}</span></div>`;
+            });
+        }
+    };
+
+    convertBtn.onclick = async () => {
+        convertBtn.disabled = true;
+        const files = pdfInput.files;
+
+        for (let i = 0; i < files.length; i++) {
+            statusMsg.innerText = `⏳ Waa la habaynayaa: ${files[i].name}...`;
+            await processPDFFile(files[i]);
         }
 
-        status.innerText = "Waa lala soo baxayaa xogta... fadlan sug.";
-        const file = fileInput.files[0];
-        const reader = new FileReader();
+        statusMsg.innerHTML = "<span style='color: #10b981;'><i class='fas fa-check-circle'></i> Dhammaan waa la dhameeyay!</span>";
+        convertBtn.disabled = false;
+    };
 
-        reader.onload = async function() {
-            const typedarray = new Uint8Array(this.result);
-            const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            let fullText = "";
+    async function processPDFFile(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const pdf = await pdfjsLib.getDocument({data: new Uint8Array(this.result)}).promise;
+                let fullText = "";
 
-            // 1. Akhrinta dhammaan boggaga PDF-ka
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(" ");
-                fullText += pageText + "\n";
-            }
+                for (let j = 1; j <= pdf.numPages; j++) {
+                    const page = await pdf.getPage(j);
+                    const textContent = await page.getTextContent();
+                    // Sort items by position to avoid missing text
+                    const sortedItems = textContent.items.sort((a, b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
+                    fullText += sortedItems.map(item => item.str).join(" ") + "\n";
+                }
 
-            processData(fullText);
-        };
-        reader.readAsArrayBuffer(file);
-    });
-
-    function processData(text) {
-        // Tani waa qaybta xogta u kala jebinaysa Question iyo Options
-        // Waxay raadinaysaa qaabka "1. Su'aasha..."
-        const lines = text.split(/\d+\./); 
-        const data = [];
-
-        // Madaxa Excel-ka (Headers) sida sawirkaaga ka muuqata
-        data.push(["Question", "Option1", "Option2", "Option3", "Option4", "CorrectAnswer"]);
-
-        lines.forEach((line, index) => {
-            if (index === 0 || line.trim() === "") return;
-
-            // Isku day inaad xogta u kala qaybiso su'aal iyo dookhyo
-            // Fiiro gaar ah: Tani waxay ku xirantahay sida PDF-kaagu u qoran yahay
-            let parts = line.split(/(?=[A-D]\)|[A-D]\.)/); // Waxay raadinaysaa A) ama A.
-            
-            let question = parts[0]?.trim() || "N/A";
-            let opt1 = parts[1]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let opt2 = parts[2]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let opt3 = parts[3]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let opt4 = parts[4]?.replace(/^[A-D][\.\)]\s*/, "").trim() || "";
-            let correct = ""; // PDF-ku inta badan ma sheego jawaabta saxda ah haddaan si gaar ah loo calaamadin
-
-            data.push([question, opt1, opt2, opt3, opt4, correct]);
+                generateExcelData(fullText, file.name.split('.')[0]);
+                resolve();
+            };
+            reader.readAsArrayBuffer(file);
         });
-
-        createExcel(data);
     }
 
-    function createExcel(data) {
-        const status = document.getElementById('status');
-        
-        // Sameynta Workbook-ga Excel
+    function generateExcelData(text, fileName) {
+        const blocks = text.split(/(?=\b\d+[\.\)\-\s]|\b[\u0660-\u0669]+[\.\)])/);
+        const rows = [];
+
+        // Styles
+        const s11 = { font: { name: "Calibri", sz: 11 } };
+        const s11Bold = { font: { name: "Calibri", sz: 11, bold: true }, alignment: { horizontal: "center" } };
+
+        // Row 1 & 2: Bannaan
+        rows.push([null], [null]);
+
+        // Row 3: Main Title
+        rows.push([
+            null, 
+            { v: `EXAM: ${fileName.toUpperCase()}`, s: { font: { name: "Calibri", sz: 11, bold: true } } }, 
+            null, null, null, null, null
+        ]);
+
+        // Row 4: Headers
+        const headerNames = ["No", "Question", "Option 1", "Option 2", "Option 3", "Option 4", "Correct Answer"];
+        rows.push(headerNames.map(h => ({ v: h, s: s11Bold })));
+
+        let counter = 1;
+        blocks.forEach((block) => {
+            if (block.trim().length < 15) return;
+
+            let parts = block.split(/(?=\b[A-D][\.\)\-\s])/i);
+            let question = parts[0].replace(/^[\d\u0660-\u0669]+[\.\)\-\s]*/, "").trim();
+            
+            let options = [];
+            for (let i = 1; i <= 4; i++) {
+                let o = parts[i] ? parts[i].trim().replace(/^[A-D][\.\)\-\s]*/i, "").replace(/[\*✓]/g, "").trim() : "";
+                options.push(o);
+            }
+
+            // CORRECT ANSWER LOGIC (Hadda waa Qoraalka)
+            let answerText = "";
+            let keyMatch = block.match(/(?:Answer|Ans|Key|Jawaab|J):\s*([A-D])/i);
+            
+            if (keyMatch) {
+                let letter = keyMatch[1].toUpperCase();
+                let idx = "ABCD".indexOf(letter);
+                answerText = options[idx] || letter;
+            } else {
+                // Find via markers like * or ✓
+                for (let i = 0; i < 4; i++) {
+                    if (parts[i+1] && (parts[i+1].includes("*") || parts[i+1].includes("✓"))) {
+                        answerText = options[i];
+                        break;
+                    }
+                }
+            }
+
+            rows.push([
+                { v: counter++, s: s11 },
+                { v: question, s: s11 },
+                { v: options[0], s: s11 },
+                { v: options[1], s: s11 },
+                { v: options[2], s: s11 },
+                { v: options[3], s: s11 },
+                { v: answerText, s: s11 }
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+
+        // Columns Width
+        ws['!cols'] = [
+            { wch: 6 },   // A
+            { wch: 75 },  // B (Question)
+            { wch: 20 },  // C
+            { wch: 20 },  // D
+            { wch: 20 },  // E
+            { wch: 20 },  // F
+            { wch: 30 }   // G (Answer Text)
+        ];
+
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(data);
-
-        // Ku darista sheet-ka
-        XLSX.utils.book_append_sheet(wb, ws, "Exam Data");
-
-        // Soo dejinta faylka
-        XLSX.writeFile(wb, "History_Exam_Converted.xlsx");
-        
-        status.innerText = "Waa la dhameeyay! Faylkii Excel-ka waa kuu soo degay.";
+        XLSX.utils.book_append_sheet(wb, ws, "Exam");
+        XLSX.writeFile(wb, `${fileName}_Final.xlsx`);
     }
 </script>
 
